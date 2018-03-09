@@ -34,7 +34,7 @@ var Temporal = function(model, sequelize, temporalOptions){
     }
   };
 
-  var excludedAttributes = ["Model","unique","primaryKey","autoIncrement", "set", "get", "_modelAttribute"];
+  var excludedAttributes = ["Model","unique","primaryKey","autoIncrement", "set", "get", "_modelAttribute","validate"];
   var historyAttributes = _(model.rawAttributes).mapValues(function(v){
     v = excludeAttributes(v, excludedAttributes);
     // remove the "NOW" defaultValue for the default timestamps
@@ -50,15 +50,9 @@ var Temporal = function(model, sequelize, temporalOptions){
   var historyOwnOptions = {
     timestamps: false
   };
-  var excludedNames = ["name", "tableName", "sequelize", "uniqueKeys", "hasPrimaryKey", "hooks", "scopes", "instanceMethods", "defaultScope"];
+  var excludedNames = ["tableName", "name", "sequelize", "uniqueKeys", "hasPrimaryKey", "hooks", "scopes", "instanceMethods", "defaultScope"];
   var modelOptions = excludeAttributes(model.options, excludedNames);
   var historyOptions = _.assign({}, modelOptions, historyOwnOptions);
-  
-  // We want to delete indexes that have unique constraint
-  var indexes = historyOptions.indexes;
-  if(Array.isArray(indexes)){
-     historyOptions.indexes = indexes.filter(function(index){return !index.unique && index.type != 'UNIQUE';});
-  }
 
   var modelHistory = sequelize.define(historyName, historyAttributes, historyOptions);
 
